@@ -1,5 +1,14 @@
 #include "chip8.h"
 
+#include <fstream>
+#include <iostream>
+#include <bitset>
+
+const unsigned int FONTSET_SIZE = 80;
+const unsigned int FONTSET_START_ADDRESS = 0x50;
+const unsigned int START_ADDRESS = 0x200;
+
+
 Chip8::Chip8()
         : pc(0x200u), index(0x0u), sound_timer(0x0u), delay_timer(0x0u), sp(0x0u)
 {
@@ -28,8 +37,31 @@ Chip8::Chip8()
 
 void Chip8::load_rom(std::string filename)
 {
+        std::ifstream file(filename, std::ios::binary | std::ios::ate);
 
+        if(file.is_open()) {
+                std::streampos size = file.tellg();
+                char* buffer = new char[size];
+                file.seekg(0, std::ios::beg);
+                file.read(buffer, size);
+                file.close();
 
+                for (long i = 0; i < size; ++i) {
+                        memory[START_ADDRESS + i] = buffer[i];
+                }
+
+                delete[] buffer;
+        }
+
+}
+
+void Chip8::dump_mem()
+{
+        for (auto &item : memory) {
+                std::bitset<8> converted(item);
+                std::cout << converted.to_ulong();
+                std::cout << "\n";
+        }
 }
 
 void Chip8::cycle()
