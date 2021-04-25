@@ -59,7 +59,7 @@ void Chip8::dump_mem()
 {
         for (auto &item : memory) {
                 std::bitset<8> converted(item);
-                std::cout << converted.to_ulong();
+                std::cout << std::hex << converted.to_ulong();
                 std::cout << "\n";
         }
 }
