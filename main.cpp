@@ -1,7 +1,7 @@
-#include <iostream>
+#include "chip8.h"
 #include "platform.h"
+#include <iostream>
 #include <chrono>
-#include </home/joe/Projects/Personal/chip8-cpp/chip8.h>
 
 int main(int argc, char ** argv)
 {
@@ -32,14 +32,9 @@ int main(int argc, char ** argv)
 
 		if (dt > cycle_delay) {
 			lastCycleTime = currentTime;
-
 			chip8.cycle();
-			// chip8.dump_regs();
-			// platform.Update(chip8.video, videoPitch);
-			// chip8.dump_display();
 			platform.Update(chip8.display.data(), video_pitch);
 		}
 	}
-
 	return 0;
 }

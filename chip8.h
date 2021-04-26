@@ -1,7 +1,7 @@
 #pragma once
 
-#include <array>
 #include <stdint.h>
+#include <array>
 #include <string>
 #include <random>
 
@@ -145,10 +145,10 @@ private:
         std::array<uint8_t, 16> v_registers{};
         std::array<uint8_t, 4096> memory{};
         std::array<uint16_t, 16> stack{};
+        uint16_t pc;
         uint16_t index;
         uint8_t sound_timer;
         uint8_t delay_timer;
-        uint16_t pc;
         uint8_t sp;
         std::array<uint8_t, 80> fontset{};
 
