@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <bitset>
+#include <chrono>
 
 const unsigned int FONTSET_SIZE = 80;
 const unsigned int FONTSET_START_ADDRESS = 0x50;
@@ -10,7 +11,8 @@ const unsigned int START_ADDRESS = 0x200;
 
 
 Chip8::Chip8()
-        : pc(0x200u), index(0x0u), sound_timer(0x0u), delay_timer(0x0u), sp(0x0u)
+        : pc(0x200u), index(0x0u), sound_timer(0x0u), delay_timer(0x0u), sp(0x0u),
+        rand_gen(std::chrono::system_clock::now().time_since_epoch().count())
 {
 
         fontset =
@@ -32,6 +34,13 @@ Chip8::Chip8()
 		0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
 		0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 	};
+
+        for (unsigned int i = 0; i < FONTSET_SIZE; ++i) {
+		memory[FONTSET_START_ADDRESS + i] = fontset[i];
+	}
+
+
+        rand_byte = std::uniform_int_distribution<uint8_t>(0, 255u);
 
 }
 
@@ -84,7 +93,7 @@ void Chip8::dump_display()
         for (int i{0}; auto &pixel : display) {
                 std::bitset<8> converted(pixel);
                 std::cout << converted.to_ulong();
-                if ((i != 0) && (i % 64 == 0)) {
+                if ((i + 1) % 64 == 0) {
                         std::cout << "\n";
                 }
                 ++i;
@@ -421,7 +430,7 @@ void Chip8::op_dxyn(uint8_t x, uint8_t y, uint8_t n, uint16_t kk, uint16_t nnn)
 				if (scr_pixel == 0xFFFFFFFF) {
 					v_registers[0xF] = 1;
 				}
-				display[((y_c + i) * 64) + (x_c + j)] ^= 1;
+				display[((y_c + i) * 64) + (x_c + j)] ^= 0xffffffff;
 			}
 
                 }

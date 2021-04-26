@@ -3,6 +3,15 @@
 #include <array>
 #include <stdint.h>
 #include <string>
+#include <random>
+
+
+const unsigned int KEY_COUNT = 16;
+const unsigned int MEMORY_SIZE = 4096;
+const unsigned int REGISTER_COUNT = 16;
+const unsigned int STACK_LEVELS = 16;
+const unsigned int VIDEO_HEIGHT = 32;
+const unsigned int VIDEO_WIDTH = 64;
 
 class Chip8
 {
@@ -16,6 +25,9 @@ public:
         void dump_display();
         void dump_regs();
         void cycle();
+
+        std::array<uint8_t, 2048> display{};
+
 
 private:
 
@@ -129,8 +141,6 @@ private:
         // Fx65 - LD Vx, [I]
         void op_fx65(uint8_t x, uint8_t y, uint8_t n, uint16_t kk, uint16_t nnn);
 
-        std::array<uint8_t, 2048> display{};
-
         std::array<uint8_t, 16> v_registers{};
         std::array<uint8_t, 4096> memory{};
         std::array<uint16_t, 16> stack{};
@@ -140,6 +150,10 @@ private:
         uint16_t pc;
         uint8_t sp;
         std::array<uint8_t, 80> fontset{};
+
+        std::default_random_engine rand_gen;
+	std::uniform_int_distribution<uint8_t> rand_byte;
+
 
 
 };

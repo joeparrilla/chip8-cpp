@@ -1,12 +1,13 @@
-cmake_minimum_required(VERSION 3.0.0)
-project(chip8 VERSION 0.1.0)
+cmake_minimum_required(VERSION 3.7)
+project(chip8)
 
-include(CTest)
-enable_testing()
-set (CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 20)
 
-add_executable(chip8 main.cpp chip8.cpp)
+find_package(SDL2 REQUIRED)
+include_directories(${SDL2_INCLUDE_DIRS})
 
-set(CPACK_PROJECT_NAME ${PROJECT_NAME})
-set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
-include(CPack)
+add_executable(chip8 chip8.cpp main.cpp platform.cpp)
+
+target_compile_options(chip8 PRIVATE -Wall)
+
+target_link_libraries(chip8 PRIVATE ${SDL2_LIBRARIES})
