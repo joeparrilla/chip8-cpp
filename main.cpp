@@ -3,14 +3,19 @@
 #include <chrono>
 #include </home/joe/Projects/Personal/chip8-cpp/chip8.h>
 
-int main(int, char **)
+int main(int argc, char ** argv)
 {
-	Chip8 chip8;
-	chip8.load_rom("/home/joe/Projects/Personal/chip8-cpp/roms/IBM Logo.ch8");
-	// chip8.load_rom("/home/joe/Projects/Personal/chip8-cpp/roms/BC_test.ch8");
+	if (argc != 4) {
+		std::cerr << "Usage: " << argv[0] << " <Scale> <Delay> <ROM>\n";
+		std::exit(EXIT_FAILURE);
+	}
 
-	// chip8.dump_mem();
-	int video_scale = 5;
+	int video_scale = std::stoi(argv[1]);
+	int cycle_delay = std::stoi(argv[2]);
+	char const* rom_file_name = argv[3];
+
+	Chip8 chip8;
+	chip8.load_rom(rom_file_name);
 
 	Platform platform("CHIP-8 Emulator", VIDEO_WIDTH * video_scale, VIDEO_HEIGHT * video_scale, VIDEO_WIDTH, VIDEO_HEIGHT);
 	int video_pitch = sizeof(chip8.display[0]) * VIDEO_WIDTH;
@@ -20,19 +25,18 @@ int main(int, char **)
 
 	while (!quit)
 	{
-		// quit = platform.ProcessInput(chip8.keypad);
+		quit = platform.ProcessInput(chip8.keypad.data());
 
 		auto currentTime = std::chrono::high_resolution_clock::now();
 		float dt = std::chrono::duration<float, std::chrono::milliseconds::period>(currentTime - lastCycleTime).count();
 
-		// if (dt > cycleDelay)
-		if (dt > 10) {
+		if (dt > cycle_delay) {
 			lastCycleTime = currentTime;
 
 			chip8.cycle();
 			// chip8.dump_regs();
 			// platform.Update(chip8.video, videoPitch);
-			chip8.dump_display();
+			// chip8.dump_display();
 			platform.Update(chip8.display.data(), video_pitch);
 		}
 	}

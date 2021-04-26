@@ -410,7 +410,7 @@ void Chip8::op_bnnn(uint8_t x, uint8_t y, uint8_t n, uint16_t kk, uint16_t nnn)
 // Cxkk - RND Vx, byte
 void Chip8::op_cxkk(uint8_t x, uint8_t y, uint8_t n, uint16_t kk, uint16_t nnn)
 {
-
+        v_registers[x] = rand_byte(rand_gen) & kk;
 }
 
 // Dxyn - DRW Vx, Vy, nibble
@@ -420,17 +420,17 @@ void Chip8::op_dxyn(uint8_t x, uint8_t y, uint8_t n, uint16_t kk, uint16_t nnn)
         uint8_t y_c = v_registers[y] % 32;
         v_registers[0xF] = 0u;
         // std::cout << "drawing to " << +x_c << "," << +y_c << "\n";
-        for (long i = 0; i < n; ++i) {
-                uint8_t spr_byte = index + i;
-                for (long j = 0; j < 8; ++j) {
-                        uint8_t spr_pixel = spr_byte & (0x80u >> j);
-                        uint32_t scr_pixel = display[((y_c + i) * 64) + (x_c + j)];
+        for (unsigned int row = 0; row < n; ++row) {
+                uint8_t spr_byte = memory[index + row];
+                for (unsigned int col = 0; col < 8; ++col) {
+                        uint8_t spr_pixel = spr_byte & (0x80u >> col);
+                        uint32_t scr_pixel = display[((y_c + row) * 64) + (x_c + col)];
 
 			if (spr_pixel) {
 				if (scr_pixel == 0xFFFFFFFF) {
 					v_registers[0xF] = 1;
 				}
-				display[((y_c + i) * 64) + (x_c + j)] ^= 0xffffffff;
+				display[((y_c + row) * 64) + (x_c + col)] ^= 0xffffffff;
 			}
 
                 }
@@ -440,65 +440,135 @@ void Chip8::op_dxyn(uint8_t x, uint8_t y, uint8_t n, uint16_t kk, uint16_t nnn)
 // Ex9E - SKP Vx
 void Chip8::op_ex9e(uint8_t x, uint8_t y, uint8_t n, uint16_t kk, uint16_t nnn)
 {
-
+        if (keypad[v_registers[x]]) {
+		pc += 2;
+	}
 }
 
 // ExA1 - SKNP Vx
 void Chip8::op_exa1(uint8_t x, uint8_t y, uint8_t n, uint16_t kk, uint16_t nnn)
 {
-
+        if (!keypad[v_registers[x]]) {
+		pc += 2;
+	}
 }
 
 // Fx07 - LD Vx, DT
 void Chip8::op_fx07(uint8_t x, uint8_t y, uint8_t n, uint16_t kk, uint16_t nnn)
 {
+        v_registers[x] = delay_timer;
 
 }
 
 // Fx0A - LD Vx, K
 void Chip8::op_fx0a(uint8_t x, uint8_t y, uint8_t n, uint16_t kk, uint16_t nnn)
 {
-
+        if (keypad[0]) {
+		v_registers[x] = 0;
+	}
+	else if (keypad[1]) {
+		v_registers[x] = 1;
+	}
+	else if (keypad[2]) {
+		v_registers[x] = 2;
+	}
+	else if (keypad[3]) {
+		v_registers[x] = 3;
+	}
+	else if (keypad[4]) {
+		v_registers[x] = 4;
+	}
+	else if (keypad[5]) {
+		v_registers[x] = 5;
+	}
+	else if (keypad[6]) {
+		v_registers[x] = 6;
+	}
+	else if (keypad[7]) {
+		v_registers[x] = 7;
+	}
+	else if (keypad[8]) {
+		v_registers[x] = 8;
+	}
+	else if (keypad[9]) {
+		v_registers[x] = 9;
+	}
+	else if (keypad[10]) {
+		v_registers[x] = 10;
+	}
+	else if (keypad[11]) {
+		v_registers[x] = 11;
+	}
+	else if (keypad[12]) {
+		v_registers[x] = 12;
+	}
+	else if (keypad[13]) {
+		v_registers[x] = 13;
+	}
+	else if (keypad[14]) {
+		v_registers[x] = 14;
+	}
+	else if (keypad[15]) {
+		v_registers[x] = 15;
+	}
+	else {
+		pc -= 2;
+	}
 }
 
 // Fx15 - LD DT, Vx
 void Chip8::op_fx15(uint8_t x, uint8_t y, uint8_t n, uint16_t kk, uint16_t nnn)
 {
-
+        delay_timer = v_registers[x];
 }
 
 // Fx18 - LD ST, Vx
 void Chip8::op_fx18(uint8_t x, uint8_t y, uint8_t n, uint16_t kk, uint16_t nnn)
 {
-
+        sound_timer = v_registers[x];
 }
 
 // Fx1E - ADD I, Vx
 void Chip8::op_fx1e(uint8_t x, uint8_t y, uint8_t n, uint16_t kk, uint16_t nnn)
 {
-
+        index += v_registers[x];
 }
 
 // Fx29 - LD F, Vx
 void Chip8::op_fx29(uint8_t x, uint8_t y, uint8_t n, uint16_t kk, uint16_t nnn)
 {
-
+        index = FONTSET_START_ADDRESS + (5 * v_registers[x]);
 }
 
 // Fx33 - LD B, Vx
 void Chip8::op_fx33(uint8_t x, uint8_t y, uint8_t n, uint16_t kk, uint16_t nnn)
-{
+{       //CHECK FOR ACCURACY
+        uint8_t value = v_registers[x];
 
+	// Ones-place
+	memory[index + 2] = value % 10;
+	value /= 10;
+
+	// Tens-place
+	memory[index + 1] = value % 10;
+	value /= 10;
+
+	// Hundreds-place
+	memory[index] = value;
 }
 
 // Fx55 - LD [I], Vx
 void Chip8::op_fx55(uint8_t x, uint8_t y, uint8_t n, uint16_t kk, uint16_t nnn)
 {
-
+        for (uint8_t i = 0; i <= x; ++i) {
+		memory[index + i] = v_registers[i];
+	}
 }
 
 // Fx65 - LD Vx, [I]
 void Chip8::op_fx65(uint8_t x, uint8_t y, uint8_t n, uint16_t kk, uint16_t nnn)
 {
-
+        for (uint8_t i = 0; i <= x; ++i) {
+		v_registers[i] = memory[index + i];
+	}
 }

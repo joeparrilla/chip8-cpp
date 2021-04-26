@@ -26,7 +26,8 @@ public:
         void dump_regs();
         void cycle();
 
-        std::array<uint8_t, 2048> display{};
+        std::array<uint32_t, 2048> display{};
+        std::array<uint8_t, KEY_COUNT> keypad{};
 
 
 private:
